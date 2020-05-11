@@ -2,19 +2,19 @@ package com.tieorange.syncautosizetextviews
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doAfterTextChanged
 import com.tieorange.syncautosizetextviews.R.id
 import com.tieorange.syncautosizetextviews.R.layout
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
 
-    val text1 = "Here is the second TextView  is the first TextView"
-    val text2 = "Here is the second"
+    private val text1 = "Here is the second TextView is"
+    private val text2 = "Here"
 
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,10 +31,18 @@ class MainActivity : AppCompatActivity() {
         val onTextSizeChangedListener: (SizeAwareTextView, Float) -> Unit = { view, textSize ->
             for (textView in textViewList) {
                 if (textView != view && textView.textSize != view.textSize) {
+                    val textSizeInt = textSize.roundToInt()
                     textView.setAutoSizeTextTypeUniformWithPresetSizes(
-                        intArrayOf(textSize.toInt()),
+                        intArrayOf(textSizeInt),
                         TypedValue.COMPLEX_UNIT_PX
                     )
+
+                }
+
+                if (textView == textView1) {
+                    textView1Size.text = textView1.textSize.toString()
+                } else {
+                    textView2Size.text = textView2.textSize.toString()
                 }
             }
         }
@@ -43,28 +51,18 @@ class MainActivity : AppCompatActivity() {
             textView.onTextSizeChangedListener = onTextSizeChangedListener
         }
 
-        editText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(editable: Editable) {
-                textView1.text =
-                    textView1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
-                textView2.text = textView2.textSize.toString() + editable.toString()
-            }
+        textView1.text = text1
+        textView2.text = text2
 
-            override fun beforeTextChanged(
-                charSequence: CharSequence,
-                i: Int,
-                i1: Int,
-                i2: Int
-            ) {
-            }
+        button.setOnClickListener {
+            textView1.text = text2
+            textView2.text = text1
+        }
 
-            override fun onTextChanged(
-                charSequence: CharSequence,
-                i: Int,
-                i1: Int,
-                i2: Int
-            ) {
-            }
-        })
+        editText.doAfterTextChanged { editable ->
+            textView1.text =
+                textView1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
+            textView2.text = textView2.textSize.toString() + editable.toString()
+        }
     }
 }
