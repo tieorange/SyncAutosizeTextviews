@@ -65,11 +65,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         // BOTTOM
+        bottom()
+    }
 
+    private fun bottom() {
         editTextBottom.doAfterTextChanged { editable ->
             textViewBottom1.text =
                 textViewBottom1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
             textViewBottom2.text = textViewBottom2.textSize.toString() + editable.toString()
+        }
+
+        textViewBottom1.onTextSizeChanged = { view, textSize ->
+            textViewBottom2.textSize = textSize
+        }
+
+        textViewBottom2.onTextSizeChanged = { view, textSize ->
+            textViewBottom1.textSize = textSize
         }
     }
 }

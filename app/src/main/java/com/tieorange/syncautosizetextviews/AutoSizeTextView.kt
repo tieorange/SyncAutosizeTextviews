@@ -20,6 +20,7 @@ import androidx.appcompat.widget.AppCompatTextView
  * It should work fine with most Android versions, but might have some issues on Android 3.1 - 4.04, as setTextSize will only work for the first time. <br></br>
  * More info here: https://code.google.com/p/android/issues/detail?id=22493 and here in case you wish to fix it: http://stackoverflow.com/a/21851239/878126
  */
+private const val NO_LINE_LIMIT = -1
 class AutoSizeTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -252,11 +253,14 @@ class AutoSizeTextView @JvmOverloads constructor(
 
     override fun onSizeChanged(width: Int, height: Int, oldwidth: Int, oldheight: Int) {
         super.onSizeChanged(width, height, oldwidth, oldheight)
-        if (width != oldwidth || height != oldheight)
+        if (width != oldwidth || height != oldheight) {
             adjustTextSize()
+            onTextSizeChanged
+        }
     }
 
-    companion object {
-        private val NO_LINE_LIMIT = -1
-    }
+    var onTextSizeChanged: (view: AutoSizeTextView, textSize: Float) -> Unit =
+        { view, size ->
+
+        }
 }
