@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
                         intArrayOf(textSizeInt),
                         TypedValue.COMPLEX_UNIT_PX
                     )
-
                 }
 
                 if (textView == textView1) {
@@ -63,6 +62,14 @@ class MainActivity : AppCompatActivity() {
             textView1.text =
                 textView1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
             textView2.text = textView2.textSize.toString() + editable.toString()
+        }
+
+        // BOTTOM
+
+        editTextBottom.doAfterTextChanged { editable ->
+            textViewBottom1.text =
+                textViewBottom1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
+            textViewBottom2.text = textViewBottom2.textSize.toString() + editable.toString()
         }
     }
 }
