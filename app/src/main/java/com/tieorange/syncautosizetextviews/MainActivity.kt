@@ -2,13 +2,13 @@ package com.tieorange.syncautosizetextviews
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import com.tieorange.syncautosizetextviews.R.id
 import com.tieorange.syncautosizetextviews.R.layout
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.math.min
 
 
 class MainActivity : AppCompatActivity() {
@@ -65,39 +65,46 @@ class MainActivity : AppCompatActivity() {
             textView2.text = textView2.textSize.toInt().toString() + editable.toString()
         }
 
+        editTextBottom.doAfterTextChanged { editable ->
+            left.text =
+                left.textSize.toString() + " Hello hello hello hello hello hello: $editable"
+            right.text = right.textSize.toString() + editable.toString()
+        }
+
         // BOTTOM
         bottom()
     }
 
-    private var textSize1: Float? = null
-    private var textSize2: Float? = null
+    private var leftTextSize: Float? = null
+    private var rightTextSize: Float? = null
     private fun bottom() {
-        editTextBottom.doAfterTextChanged { editable ->
-            textViewBottom1.text =
-                textViewBottom1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
-            textViewBottom2.text = textViewBottom2.textSize.toString() + editable.toString()
-        }
-        /*1. autosize T1 and T2
-        2. get textSizes
-        3. apply textSizes.min to B1 and B2
-        4. hide/show
-        * */
-        textViewBottom1.onLayedout = { view, textSize ->
-            textSize1 = textSize
+        left.onDraw = { view, textSize ->
+            leftTextSize = textSize
             textViewBottomSize.text = textSize.toString()
-//            textViewBottomSize.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
-//            textViewBottom2.setTextSize(TypedValue.COMPLEX_UNIT_PX, 10f)
-            Log.d("TAG", "textSize1: $textSize")
+            onTextViewDraw(view, textSize)
+
         }
 
-        textViewBottom2.onLayedout = { view, textSize ->
-            textSize2 = textSize
+        right.onDraw = { view, textSize ->
+            rightTextSize = textSize
             textViewBottom2Size.text = textSize.toString()
-            Log.d("TAG", "textSize2: $textSize")
+            onTextViewDraw(view, textSize)
         }
+        left.text = "eDirham Instant"
+        right.text = "Paaaaasdfsfdsfsdfsdfdsfsdfdsfsdf"
+    }
 
+    private var viewsInitialisedCount = 0
+    private fun onTextViewDraw(view: AutoSizeTextView, textSize: Float) {
+        viewsInitialisedCount++
 
-        textViewBottom1.text = "eDirham Instant"
-        textViewBottom2.text = "Pay in app"
+        if (viewsInitialisedCount >= 2) {
+            onAllViewsAreDraw()
+        }
+    }
+
+    private fun onAllViewsAreDraw() {
+        val minTextSize = leftTextSize?.let { rightTextSize?.let { it1 -> min(it, it1) } }
+        minTextSize?.let { left.setTextSizeManually(it);  right.setTextSizeManually(it)}
     }
 }

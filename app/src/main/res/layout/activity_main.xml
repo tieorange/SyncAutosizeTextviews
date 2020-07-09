@@ -76,7 +76,7 @@
         android:orientation="horizontal">
 
         <com.tieorange.syncautosizetextviews.AutoSizeTextView
-            android:id="@+id/textViewBottom1"
+            android:id="@+id/left"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -85,7 +85,7 @@
             android:textSize="100sp" />
 
         <com.tieorange.syncautosizetextviews.AutoSizeTextView
-            android:id="@+id/textViewBottom2"
+            android:id="@+id/right"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

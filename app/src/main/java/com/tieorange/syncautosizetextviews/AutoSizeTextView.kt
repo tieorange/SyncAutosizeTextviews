@@ -13,15 +13,7 @@ import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 
-/**
- * a textView that is able to self-adjust its font size depending on the min and max size of the font, and its own size.<br></br>
- * code is heavily based on this StackOverflow thread:
- * http://stackoverflow.com/questions/16017165/auto-fit-textview-for-android/21851239#21851239 <br></br>
- * It should work fine with most Android versions, but might have some issues on Android 3.1 - 4.04, as setTextSize will only work for the first time. <br></br>
- * More info here: https://code.google.com/p/android/issues/detail?id=22493 and here in case you wish to fix it: http://stackoverflow.com/a/21851239/878126
- */
 private const val NO_LINE_LIMIT = -1
-
 class AutoSizeTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -142,7 +134,7 @@ class AutoSizeTextView @JvmOverloads constructor(
     }
 
     fun setTextSizeManually(size:Float){
-        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, size)
     }
 
     override fun setTextSize(unit: Int, size: Float) {
@@ -153,12 +145,6 @@ class AutoSizeTextView @JvmOverloads constructor(
             context.resources
         maxTextSize = TypedValue.applyDimension(unit, size, resources.displayMetrics)
         adjustTextSize()
-    }
-
-    override fun setLineSpacing(add: Float, mult: Float) {
-        super.setLineSpacing(add, mult)
-        spacingMult = mult
-        spacingAdd = add
     }
 
     fun adjustTextSize() {
@@ -173,6 +159,12 @@ class AutoSizeTextView @JvmOverloads constructor(
         availableSpaceRect.right = widthLimit.toFloat()
         availableSpaceRect.bottom = heightLimit.toFloat()
         superSetTextSize(minTextSize)
+    }
+
+    override fun setLineSpacing(add: Float, mult: Float) {
+        super.setLineSpacing(add, mult)
+        spacingMult = mult
+        spacingAdd = add
     }
 
     private fun refreshTextPaint() {
@@ -226,7 +218,7 @@ class AutoSizeTextView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         Log.d("TAG", "onDraw() called with: canvas = $canvas")
-        onLayedout?.invoke(this, textSize)
+        onDraw?.invoke(this, textSize)
     }
 
     override fun onTextChanged(text: CharSequence, start: Int, before: Int, after: Int) {
@@ -241,5 +233,5 @@ class AutoSizeTextView @JvmOverloads constructor(
         }
     }
 
-    var onLayedout: ((view: AutoSizeTextView, textSize: Float) -> Unit)? = null
+    var onDraw: ((view: AutoSizeTextView, textSize: Float) -> Unit)? = null
 }
