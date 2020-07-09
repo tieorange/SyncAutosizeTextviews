@@ -2,13 +2,13 @@ package com.tieorange.syncautosizetextviews
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import com.tieorange.syncautosizetextviews.R.id
 import com.tieorange.syncautosizetextviews.R.layout
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         val onTextSizeChangedListener: (SizeAwareTextView, Float) -> Unit = { view, textSize ->
             for (textView in textViewList) {
                 if (textView != view && textView.textSize != view.textSize) {
-                    val textSizeInt = textSize.roundToInt()
+                    val textSizeInt = textSize.toInt()
                     textView.setAutoSizeTextTypeUniformWithPresetSizes(
                         intArrayOf(textSizeInt),
                         TypedValue.COMPLEX_UNIT_PX
@@ -39,9 +39,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (textView == textView1) {
-                    textView1Size.text = textView1.textSize.toString()
+                    textView1Size.text = textView1.textSize.toInt().toString()
                 } else {
-                    textView2Size.text = textView2.textSize.toString()
+                    textView2Size.text = textView2.textSize.toInt().toString()
                 }
             }
         }
@@ -60,8 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         editText.doAfterTextChanged { editable ->
             textView1.text =
-                textView1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
-            textView2.text = textView2.textSize.toString() + editable.toString()
+                textView1.textSize.toInt().toString() + " Hello hello hello hello hello hello: $editable"
+            textView2.text = textView2.textSize.toInt().toString() + editable.toString()
         }
 
         // BOTTOM
@@ -75,12 +75,21 @@ class MainActivity : AppCompatActivity() {
             textViewBottom2.text = textViewBottom2.textSize.toString() + editable.toString()
         }
 
-        textViewBottom1.onTextSizeChanged = { view, textSize ->
+        textViewBottom1.onTextSizeChanged = { _, textSize ->
+            textViewBottomSize.text = textSize.toString()
+
             textViewBottom2.textSize = textSize
+            textViewBottom2.setMinTextSize(textSize)
+            textViewBottom2.adjustTextSize()
+            Log.d("TAG", "textSize1: $textSize")
         }
 
         textViewBottom2.onTextSizeChanged = { view, textSize ->
-            textViewBottom1.textSize = textSize
+            Log.d("TAG", "textSize2: $textSize")
+            textViewBottom2Size.text = textSize.toString()
         }
+
+        textViewBottom1.text = "eDirham Instant"
+        textViewBottom2.text = "Pay"
     }
 }
