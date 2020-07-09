@@ -7,8 +7,6 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.Build
-import android.text.Layout.Alignment
-import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
@@ -52,15 +50,12 @@ class AutoSizeTextView @JvmOverloads constructor(
     }
 
     init {
-        // using the minimal recommended font size
         minTextSize =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
         maxTextSize = textSize
         textPaint = TextPaint(paint)
         if (maxLines == 0)
-        // no value was assigned during construction
             maxLines = NO_LINE_LIMIT
-        // prepare size tester:
         sizeTester = object : SizeTester {
             val textRect = RectF()
 
@@ -76,39 +71,6 @@ class AutoSizeTextView @JvmOverloads constructor(
                 if (singleLine) {
                     textRect.bottom = textPaint!!.fontSpacing
                     textRect.right = textPaint!!.measureText(text)
-                } else {
-                    val layout: StaticLayout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        StaticLayout.Builder.obtain(text, 0, text.length, textPaint!!, widthLimit)
-                            .setLineSpacing(spacingAdd, spacingMult)
-                            .setAlignment(Alignment.ALIGN_NORMAL).setIncludePad(true).build()
-                    } else StaticLayout(
-                        text,
-                        textPaint,
-                        widthLimit,
-                        Alignment.ALIGN_NORMAL,
-                        spacingMult,
-                        spacingAdd,
-                        true
-                    )
-                    // return early if we have more lines
-                    if (maxLines != NO_LINE_LIMIT && layout.lineCount > maxLines)
-                        return 1
-                    textRect.bottom = layout.height.toFloat()
-                    var maxWidth = -1
-                    val lineCount = layout.lineCount
-                    for (i in 0 until lineCount) {
-                        val end = layout.getLineEnd(i)
-                        if (i < lineCount - 1 && end > 0 && !isValidWordWrap(
-                                text[end - 1],
-                                text[end]
-                            )
-                        )
-                            return 1
-                        if (maxWidth < layout.getLineRight(i) - layout.getLineLeft(i))
-                            maxWidth =
-                                layout.getLineRight(i).toInt() - layout.getLineLeft(i).toInt()
-                    }
-                    textRect.right = maxWidth.toFloat()
                 }
                 textRect.offsetTo(0f, 0f)
                 return if (availableSpace.contains(textRect)) -1 else 1
@@ -128,11 +90,6 @@ class AutoSizeTextView @JvmOverloads constructor(
 
     override fun setTypeface(tf: Typeface?) {
         super.setTypeface(tf)
-        adjustTextSize()
-    }
-
-    override fun setTextSize(size: Float) {
-        maxTextSize = size
         adjustTextSize()
     }
 
@@ -167,14 +124,25 @@ class AutoSizeTextView @JvmOverloads constructor(
         adjustTextSize()
     }
 
-    /**
-     * Set the lower text size limit and invalidate the view
-     *
-     * @param minTextSize
-     */
     fun setMinTextSize(minTextSize: Float) {
         this.minTextSize = minTextSize
         adjustTextSize()
+    }
+
+    private fun superSetTextSize(minTextSize: Int) {
+        val textSize =
+            binarySearch(minTextSize, maxTextSize.toInt(), sizeTester, availableSpaceRect)
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
+    }
+
+    override fun setTextSize(size: Float) {
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        maxTextSize = size
+        adjustTextSize()
+    }
+
+    fun setTextSizeManually(size:Float){
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
     }
 
     override fun setTextSize(unit: Int, size: Float) {
@@ -194,7 +162,6 @@ class AutoSizeTextView @JvmOverloads constructor(
     }
 
     fun adjustTextSize() {
-        // This is a workaround for truncated text issue on ListView, as shown here: https://github.com/AndroidDeveloperLB/AutoFitTextView/pull/14
         if (!initialized)
             return
         val minTextSize = minTextSize.toInt()
@@ -202,16 +169,14 @@ class AutoSizeTextView @JvmOverloads constructor(
         widthLimit = measuredWidth - compoundPaddingLeft - compoundPaddingRight
         if (widthLimit <= 0)
             return
-        textPaint = TextPaint(paint)
+        refreshTextPaint()
         availableSpaceRect.right = widthLimit.toFloat()
         availableSpaceRect.bottom = heightLimit.toFloat()
         superSetTextSize(minTextSize)
     }
 
-    private fun superSetTextSize(minTextSize: Int) {
-        val textSize =
-            binarySearch(minTextSize, maxTextSize.toInt(), sizeTester, availableSpaceRect)
-        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
+    private fun refreshTextPaint() {
+        textPaint = TextPaint(paint)
     }
 
     private fun binarySearch(
@@ -227,14 +192,17 @@ class AutoSizeTextView @JvmOverloads constructor(
         while (lo <= hi) {
             mid = (lo + hi).ushr(1)
             val midValCmp = sizeTester.onTestSize(mid, availableSpace)
-            if (midValCmp < 0) {
-                lastBest = lo
-                lo = mid + 1
-            } else if (midValCmp > 0) {
-                hi = mid - 1
-                lastBest = hi
-            } else
-                return mid
+            when {
+                midValCmp < 0 -> {
+                    lastBest = lo
+                    lo = mid + 1
+                }
+                midValCmp > 0 -> {
+                    hi = mid - 1
+                    lastBest = hi
+                }
+                else -> return mid
+            }
         }
         return lastBest
     }
@@ -258,6 +226,7 @@ class AutoSizeTextView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         Log.d("TAG", "onDraw() called with: canvas = $canvas")
+        onLayedout?.invoke(this, textSize)
     }
 
     override fun onTextChanged(text: CharSequence, start: Int, before: Int, after: Int) {
@@ -272,5 +241,5 @@ class AutoSizeTextView @JvmOverloads constructor(
         }
     }
 
-    var onTextSizeChanged: ((view: AutoSizeTextView, textSize: Float) -> Unit)? = null
+    var onLayedout: ((view: AutoSizeTextView, textSize: Float) -> Unit)? = null
 }

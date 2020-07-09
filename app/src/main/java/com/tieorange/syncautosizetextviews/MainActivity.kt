@@ -60,7 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         editText.doAfterTextChanged { editable ->
             textView1.text =
-                textView1.textSize.toInt().toString() + " Hello hello hello hello hello hello: $editable"
+                textView1.textSize.toInt()
+                    .toString() + " Hello hello hello hello hello hello: $editable"
             textView2.text = textView2.textSize.toInt().toString() + editable.toString()
         }
 
@@ -68,28 +69,35 @@ class MainActivity : AppCompatActivity() {
         bottom()
     }
 
+    private var textSize1: Float? = null
+    private var textSize2: Float? = null
     private fun bottom() {
         editTextBottom.doAfterTextChanged { editable ->
             textViewBottom1.text =
                 textViewBottom1.textSize.toString() + " Hello hello hello hello hello hello: $editable"
             textViewBottom2.text = textViewBottom2.textSize.toString() + editable.toString()
         }
-
-        textViewBottom1.onTextSizeChanged = { _, textSize ->
+        /*1. autosize T1 and T2
+        2. get textSizes
+        3. apply textSizes.min to B1 and B2
+        4. hide/show
+        * */
+        textViewBottom1.onLayedout = { view, textSize ->
+            textSize1 = textSize
             textViewBottomSize.text = textSize.toString()
-
-            textViewBottom2.textSize = textSize
-            textViewBottom2.setMinTextSize(textSize)
-            textViewBottom2.adjustTextSize()
+//            textViewBottomSize.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+//            textViewBottom2.setTextSize(TypedValue.COMPLEX_UNIT_PX, 10f)
             Log.d("TAG", "textSize1: $textSize")
         }
 
-        textViewBottom2.onTextSizeChanged = { view, textSize ->
-            Log.d("TAG", "textSize2: $textSize")
+        textViewBottom2.onLayedout = { view, textSize ->
+            textSize2 = textSize
             textViewBottom2Size.text = textSize.toString()
+            Log.d("TAG", "textSize2: $textSize")
         }
 
+
         textViewBottom1.text = "eDirham Instant"
-        textViewBottom2.text = "Pay"
+        textViewBottom2.text = "Pay in app"
     }
 }

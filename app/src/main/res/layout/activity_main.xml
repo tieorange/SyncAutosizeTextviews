@@ -11,8 +11,9 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="133dp"
-        android:orientation="horizontal">
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <com.tieorange.syncautosizetextviews.SizeAwareTextView
             android:id="@+id/textView1"
@@ -71,7 +72,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="133dp"
+        android:layout_height="100dp"
         android:orientation="horizontal">
 
         <com.tieorange.syncautosizetextviews.AutoSizeTextView
@@ -81,10 +82,7 @@
             android:layout_weight="1"
             android:background="#DEDEDE"
             android:maxLines="1"
-            android:textSize="100sp"
-            app:autoSizeMinTextSize="1sp"
-            app:autoSizeStepGranularity="0.5sp"
-            app:autoSizeTextType="uniform" />
+            android:textSize="100sp" />
 
         <com.tieorange.syncautosizetextviews.AutoSizeTextView
             android:id="@+id/textViewBottom2"
@@ -93,21 +91,24 @@
             android:layout_weight="1"
             android:background="#EEDEDE"
             android:maxLines="1"
-            android:textSize="100sp"
-            app:autoSizeMinTextSize="1sp"
-            app:autoSizeStepGranularity="0.5sp"
-            app:autoSizeTextType="uniform" />
+            android:textSize="100sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textViewBottomSize"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textViewBottom2Size"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/textViewBottomSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/textViewBottom2Size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
 
     <androidx.appcompat.widget.AppCompatEditText
